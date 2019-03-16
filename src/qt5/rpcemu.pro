@@ -1,6 +1,6 @@
 # http://doc.qt.io/qt-5/qmake-tutorial.html
 
-CONFIG += debug_and_release
+CONFIG += debug_and_release dynarec
 
 
 QT += core widgets gui multimedia

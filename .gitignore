@@ -1,0 +1,12 @@
+.DS_Store
+roms/*,fe5
+poduleroms/*,ffa
+*~
+rpcemu-interpreter.app
+rpcemu-recompiler.app
+src/qt5/release
+src/qt5/Makefile*
+src/qt5/.qmake.stash
+*.hdf
+rpclog.txt
+hostfs

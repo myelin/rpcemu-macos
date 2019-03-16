@@ -44,6 +44,10 @@
 #include "arm.h"
 #include "i8042.h"
 
+#ifdef __APPLE__
+#include "keyboard_macosx.h"
+#endif
+
 /* Keyboard Commands */
 #define KBD_CMD_ENABLE		0xf4
 #define KBD_CMD_RESET		0xff
@@ -254,6 +258,11 @@ keyboard_reset(void)
 	/* Mousehack reset */
 	mouse_hack.pointer = 0;
 	mouse_hack.cursor_linked = 1;
+    
+#ifdef __APPLE__
+    keyboard_reset_modifiers(0);
+#endif
+    
 }
 
 static uint8_t

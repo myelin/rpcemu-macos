@@ -170,6 +170,11 @@ extern int cyccount;
 
 /* These functions can optionally be overridden by a platform. If not
    needed to be overridden, there is a generic version in rpc-machdep.c */
+
+#ifdef __APPLE__
+extern int rpcemu_set_datadir(const char *path);
+#endif
+
 extern const char *rpcemu_get_datadir(void);
 extern const char *rpcemu_get_log_path(void);
 

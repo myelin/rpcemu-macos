@@ -13,4 +13,4 @@ make
 qmake "CONFIG+=dynarec"
 make
 
-zip $OUTPUT $APPS
+zip -r $OUTPUT $APPS

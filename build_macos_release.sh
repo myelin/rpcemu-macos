@@ -1,16 +1,32 @@
 #!/bin/bash
 set -euxo pipefail
 
-VERSION=0.9.1-pp1
-OUTPUT=rpcemu-macos-$VERSION.zip
+VERSION=0.9.1-pp2
 APPS="rpcemu-recompiler.app rpcemu-interpreter.app"
-rm -rf $APPS $OUTPUT
-cd src/qt5
-export PATH="/usr/local/opt/qt/bin:$PATH"
-qmake
-make clean
-make
-qmake "CONFIG+=dynarec"
-make
 
-zip -r $OUTPUT $APPS
+function make_dmg {
+    APP="$1"
+    macdeployqt $APP.app -dmg
+    mv $APP.dmg $APP-$VERSION.dmg
+}
+
+# Get rid of past build output
+rm -rf $APPS
+
+# Access Qt build tools
+export PATH="/usr/local/opt/qt/bin:$PATH";
+
+# Build interpreter version
+(cd src/qt5;
+    qmake -config release;
+    #make clean;
+    make;
+)
+make_dmg "rpcemu-interpreter"
+
+# Build recompiler version
+(cd src/qt5;
+    qmake "CONFIG+=dynarec" -config release
+    make
+)
+make_dmg "rpcemu-recompiler"

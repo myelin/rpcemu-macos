@@ -2,8 +2,9 @@
 roms/*,fe5
 poduleroms/*,ffa
 *~
-rpcemu-interpreter.app
-rpcemu-recompiler.app
+rpcemu-*.app
+rpcemu-*.dmg
+src/qt5/debug
 src/qt5/release
 src/qt5/Makefile*
 src/qt5/.qmake.stash

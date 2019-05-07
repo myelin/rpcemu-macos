@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euxo pipefail
 
-VERSION=0.9.1-pp2
+VERSION=0.9.1-pp3
 APPS="rpcemu-recompiler.app rpcemu-interpreter.app"
 
 function make_dmg {
@@ -14,19 +14,20 @@ function make_dmg {
 rm -rf $APPS
 
 # Access Qt build tools
-export PATH="/usr/local/opt/qt/bin:$PATH";
+export PATH="/usr/local/opt/qt/bin:$PATH"
 
 # Build interpreter version
-(cd src/qt5;
-    qmake -config release;
-    #make clean;
-    make;
+(cd src/qt5
+    qmake -config release
+    make clean  # start with a clean slate
+    make
 )
 make_dmg "rpcemu-interpreter"
 
 # Build recompiler version
-(cd src/qt5;
+(cd src/qt5
     qmake "CONFIG+=dynarec" -config release
     make
+    make clean  # remove release artifacts so future debug builds work
 )
 make_dmg "rpcemu-recompiler"

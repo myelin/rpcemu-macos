@@ -23,6 +23,8 @@
 
 #include <Carbon/Carbon.h>
 
+#define UNUSED(x) (void)(x)
+
 const int MAX_KEYBOARD_LAYOUTS = 20;
 
 typedef enum
@@ -196,6 +198,7 @@ typedef struct {
     uint maskRight;
     uint8_t set_2_left[8];
     uint8_t set_2_right[8];
+    int simulateMenuButton;
 } ModifierMapInfo;
 
 // The following are from the "NSEventModifierFlagOption" enumeration.
@@ -208,11 +211,11 @@ typedef enum
 } NativeModifierFlag;
 
 static const ModifierMapInfo modifier_map[] = {
-    {nativeModifierFlagShift, modifierKeyStateShift, 0x102, 0x104, {0x12}, {0x59} },                       // Shift.
-    {nativeModifierFlagControl, modifierKeyStateControl, 0x101, 0x2100, {0x14}, {0xe0, 0x14} },            // Control.
-    {nativeModifierFlagOption, modifierKeyStateAlt, 0x120, 0x140, {0x11}, {0xe0, 0x11}},                   // Alt.
-    {nativeModifierFlagCommand, modifierKeyStateCommand, 0x100108, 0x100110, {0xe0, 0x1f}, {0xe0, 0x27}},  // Command.
-    {0x1<<31, 0, 0, 0, {0}, {0} },
+    {nativeModifierFlagShift, modifierKeyStateShift, 0x102, 0x104, {0x12}, {0x59}, 0 },                      // Shift.
+    {nativeModifierFlagControl, modifierKeyStateControl, 0x101, 0x2100, {0x14}, {0xe0, 0x14}, 0},            // Control.
+    {nativeModifierFlagOption, modifierKeyStateAlt, 0x120, 0x140, {0x11}, {0xe0, 0x11}, 0},                  // Alt.
+    {nativeModifierFlagCommand, modifierKeyStateCommand, 0x100108, 0x100110, {0xe0, 0x1f}, {0xe0, 0x27}, 1}, // Command.
+    {0x1<<31, 0, 0, 0, {0}, {0}, 0 },
 };
 
 int get_virtual_key_index(size_t k)
@@ -252,31 +255,48 @@ void keyboard_handle_modifier_keys(uint mask)
     {
         int state = modifierState.keyState[modifier_map[k].checkMask];
         uint modifierMask = modifier_map[k].modifierMask;
-        
+
         if ((mask & modifierMask) != 0)
         {
-            if (modifier_map[k].maskLeft != 0xFFFFFFFF && (mask & modifier_map[k].maskLeft) == modifier_map[k].maskLeft && (state & 1) == 0)
+            if (modifier_map[k].simulateMenuButton && config.mousetwobutton && state == 0)
             {
-                state |= 1;
-                keyboard_key_press(modifier_map[k].set_2_left);
+                state = 3;
+                mouse_mouse_press(4);
             }
-            if (modifier_map[k].maskRight != 0xFFFFFFFF && (mask & modifier_map[k].maskRight) == modifier_map[k].maskRight && (state & 2) == 0)
+            else
             {
-                state |= 2;
-                keyboard_key_press(modifier_map[k].set_2_right);
+                if ((mask & modifier_map[k].maskLeft) == modifier_map[k].maskLeft && (state & 1) == 0)
+                {
+                    state |= 1;
+                    keyboard_key_press(modifier_map[k].set_2_left);
+                }
+
+                if ((mask & modifier_map[k].maskRight) == modifier_map[k].maskRight && (state & 2) == 0)
+                {
+                    state |= 2;
+                    keyboard_key_press(modifier_map[k].set_2_right);
+                }
             }
         }
-        else if ((mask & modifierMask) ==0 && state != 0)
+        else if ((mask & modifierMask) == 0 && state != 0)
         {
-            if (state & 1)
+            if (config.mousetwobutton && modifier_map[k].simulateMenuButton)
             {
-                state &= ~1;
-                keyboard_key_release(modifier_map[k].set_2_left);
+                state = 0;
+                mouse_mouse_release(4);
             }
-            if (state & 2)
+            else
             {
-                state &= ~2;
-                keyboard_key_release(modifier_map[k].set_2_right);
+                if (state & 1)
+                {
+                    state &= ~1;
+                    keyboard_key_release(modifier_map[k].set_2_left);
+                }
+                if (state & 2)
+                {
+                    state &= ~2;
+                    keyboard_key_release(modifier_map[k].set_2_right);
+                }
             }
         }
 
@@ -323,4 +343,11 @@ void keyboard_configure_layout(const char *layoutName)
     {
     fprintf(stderr, "Using keyboard layout '%s' (%d).\n", layoutName, keyboardType);
     }
+}
+
+int keyboard_check_special_keys(unsigned scanCode, unsigned modifiers)
+{
+  UNUSED(modifiers);
+
+  return (modifierState.keyState[modifierKeyStateControl] != 0 && scanCode == kVK_End);
 }

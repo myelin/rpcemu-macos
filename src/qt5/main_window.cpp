@@ -35,6 +35,7 @@
 
 #if defined(Q_OS_MACOS)
 #include "macosx/events-macosx.h"
+#include "keyboard_macosx.h"
 #endif /* Q_OS_MACOS */
 
 #include "rpcemu.h"
@@ -70,6 +71,9 @@ MainDisplay::MainDisplay(Emulator &emulator, QWidget *parent)
 void
 MainDisplay::mouseMoveEvent(QMouseEvent *event)
 {
+    // Ignore mouse events if the application is terminating.
+    if (quited) return;
+
 	if((!pconfig_copy->mousehackon && mouse_captured) || full_screen) {
 		QPoint middle;
 
@@ -94,7 +98,10 @@ MainDisplay::mouseMoveEvent(QMouseEvent *event)
 void
 MainDisplay::mousePressEvent(QMouseEvent *event)
 {
-	// Handle turning on mouse capture in capture mouse mode
+    // Ignore mouse events if the application is terminating.
+    if (quited) return;
+
+    // Handle turning on mouse capture in capture mouse mode
 	if(!pconfig_copy->mousehackon) {
 		if(!mouse_captured) {
 			mouse_captured = 1;
@@ -114,6 +121,9 @@ MainDisplay::mousePressEvent(QMouseEvent *event)
 void
 MainDisplay::mouseReleaseEvent(QMouseEvent *event)
 {
+    // Ignore mouse events if the application is terminating.
+    if (quited) return;
+
 	if (event->button() & 7) {
 		emit this->emulator.mouse_release_signal(event->button() & 7);
 	}
@@ -494,7 +504,11 @@ MainWindow::keyPressEvent(QKeyEvent *event)
 	}
 
 	// Special case, check for Ctrl-End, our multi purpose do clever things key
+#if defined(Q_OS_MACOS)
+	if (keyboard_check_special_keys(event->nativeVirtualKey(), event->nativeModifiers())) {
+#else
 	if((Qt::Key_End == event->key()) && (event->modifiers() & Qt::ControlModifier)) {
+#endif
 		if(full_screen) {
 			// Change Full Screen -> Windowed
 

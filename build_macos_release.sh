@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euxo pipefail
 
-VERSION=0.9.1-pp3
+VERSION=0.9.1-pp4
 APPS="rpcemu-recompiler.app rpcemu-interpreter.app"
 
 function make_dmg {

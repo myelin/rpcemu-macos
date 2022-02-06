@@ -1,3 +1,11 @@
+# This is out of date
+
+I haven't had time to keep up with Timothy's changes, and he's created his own GitHub repository over here: https://github.com/Septercius/rpcemu-dev
+
+You can download his latest releases from here: https://github.com/Septercius/rpcemu-dev/tags
+
+- Phil
+
 # RPCEmu macOS builds
 
 This is Phillip Pearson's fork of [RPCEmu](http://www.marutan.net/rpcemu/).  It contains the latest 0.9.1 code, plus Timothy Coltman's macOS patches, and some scripting to produce useful builds.
